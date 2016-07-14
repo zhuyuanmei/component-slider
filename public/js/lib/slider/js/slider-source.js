@@ -62,8 +62,6 @@ define(function(require, exports, module) {
 
             // 更新width
             me._initWidth( $el, me.index );
-            me._container.on(transitionEnd + me.eventNs,
-                $.proxy( me._tansitionEnd, me ));
 
             // 转屏事件检测
             $( window ).on('resize', function() {
@@ -87,13 +85,7 @@ define(function(require, exports, module) {
                 return map[ e.type ] && me[ map[ e.type ] ].call( me,e);
             };
 
-            $el.on( 'slideend ready', function(){
-                if(opts.autoPlay){
-                    me.resume();
-                }
-            });
-
-            var updateDots = function( to, from ) {
+            var updateDots = function( to ) {
                 var dotsParent = $el.find( opts.selector.dots );
 
                 if ( !dotsParent.length ) {
@@ -111,26 +103,16 @@ define(function(require, exports, module) {
                     dotsParent.appendTo( $el );
                 }
 
-                this._dots = dotsParent.children().toArray();
-
-                var dots = this._dots;
-
                 dotsParent.children().removeClass('ui-state-active');
 
-                $.each(dots,function(i,n){
-                    if(me.index === i){
-                        $(n).addClass('ui-state-active');
-                    }
-                });
+                dotsParent.children().eq(to).addClass('ui-state-active');
             };
 
-            $el.on( 'slide', function( e, to, from ) {
-                if(opts.dots){
-                    updateDots.call( me, to, from );
-                }
-            } );
-
             $el.on( 'ready', function(){
+                if(opts.autoPlay){
+                    me.resume();
+                }
+
                 // 绑定手势
                 $el.on('touchstart', me._handler);
 
@@ -194,10 +176,8 @@ define(function(require, exports, module) {
         },
 
         _onMove: function( e ) {
-
             // 多指或缩放不处理
-            if ( e.touches.length > 1 || e.scale &&
-                e.scale !== 1 ) {
+            if ( e.touches.length > 1 || e.scale && e.scale !== 1 ) {
                 return false;
             }
 
@@ -224,7 +204,6 @@ define(function(require, exports, module) {
                 e.preventDefault();
 
                 if ( !opts.loop ) {
-
                     // 如果左边已经到头
                     delta.x /= (!index && delta.x > 0 ||
 
@@ -240,7 +219,6 @@ define(function(require, exports, module) {
 
                 for ( i = index - viewNum, len = index + 2 * viewNum;
                       i < len; i++ ) {
-
                     pos = opts.loop ? this._circle( i ) : i;
                     this._translate( pos, delta.x + slidePos[ pos ], 0 );
                 }
@@ -284,7 +262,6 @@ define(function(require, exports, module) {
                 pos;
 
             if ( duration < 250 ) {
-
                 // 如果滑动速度比较快，偏移量跟根据速度来算
                 speed = absDeltaX / duration;
                 diff = Math.min( Math.round( speed * viewNum * 1.2 ),
@@ -306,11 +283,8 @@ define(function(require, exports, module) {
                         me.width, opts.speed );
                 }
             } else {
-
                 // 滑回去
-                for ( i = index - viewNum, len = index + 2 * viewNum;
-                      i < len; i++ ) {
-
+                for ( i = index - viewNum, len = index + 2 * viewNum; i < len; i++ ) {
                     pos = opts.loop ? me._circle( i ) : i;
                     me._translate( pos, slidePos[ pos ],
                         opts.speed );
@@ -459,15 +433,6 @@ define(function(require, exports, module) {
             return (index % len + len) % arr.length;
         },
 
-        _tansitionEnd: function( e ) {
-            // ~~用来类型转换，等价于parseInt( str, 10 );
-            if ( ~~e.target.getAttribute( 'data-index' ) !== this.index ) {
-                return;
-            }
-
-            this.trigger( 'slideend', this.index );
-        },
-
         _slide: function( from, diff, dir, width, speed, opts ) {
             var me = this,
                 to;
@@ -481,7 +446,6 @@ define(function(require, exports, module) {
 
             // 调整初始位置，如果已经在位置上不会重复处理
             this._move( to, -dir * width, 0, true );
-
             this._move( from, width * dir, speed );
             this._move( to, 0, speed );
 
@@ -490,11 +454,8 @@ define(function(require, exports, module) {
             if(opts.dots){
                 var dots = $('.ui-slider-dots').children();
                 dots.removeClass('ui-state-active');
-                $.each(dots,function(i,n){
-                    if(i === to){
-                        $(n).addClass('ui-state-active');
-                    }
-                });
+
+                dots.eq(to).addClass('ui-state-active');
             }
 
             if(opts.autoPlay) {
@@ -502,7 +463,7 @@ define(function(require, exports, module) {
                 me.resume();
             }
 
-            return this.trigger( 'slide', to, from );
+            //return this.trigger( 'slide', to, from );
         },
 
         /**
