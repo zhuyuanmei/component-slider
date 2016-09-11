@@ -224,6 +224,10 @@ define(function(require, exports, module) {
                 }
 
                 moved = true;
+            }else {
+                if(opts.autoPlay) {
+                    this.resume();
+                }
             }
         },
 
@@ -417,6 +421,10 @@ define(function(require, exports, module) {
 
             if ( !style ) {
                 return false;
+            }
+
+            if(dist > this.width){
+                dist = this.width;
             }
 
             style.cssText += cssPrefix + 'transition-duration:' + speed +
